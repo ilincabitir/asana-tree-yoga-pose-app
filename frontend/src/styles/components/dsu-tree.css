@@ -1,0 +1,39 @@
+.dsu-canvas {
+  width: 100%;
+  overflow: auto;
+  padding: 24px 16px 40px;
+}
+
+.dsu-canvas svg {
+  overflow: visible;
+  display: block;
+}
+
+.dsu-node {
+  fill: var(--bg-soft);
+  stroke: var(--line);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+}
+
+.dsu-node__fill {
+  fill: #efe7d8;
+}
+
+.dsu-label {
+  font-family: 'Cormorant Garamond', serif;
+  fill: var(--ink);
+  font-size: 15px;
+}
+
+.dsu-meta {
+  font-family: 'Quicksand', sans-serif;
+  fill: var(--muted);
+  font-size: 11px;
+}
+
+.dsu-empty {
+  color: var(--muted);
+  font-style: italic;
+  padding: 12px 0;
+}

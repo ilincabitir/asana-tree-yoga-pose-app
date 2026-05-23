@@ -1,0 +1,14 @@
+.node-card__ring {
+  fill: var(--bg-soft);
+}
+
+.node-card__label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  fill: var(--ink);
+}
+
+.node-card__meta {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 11px;
+}

@@ -1,0 +1,39 @@
+:root {
+  --bg: #f7f3ec;
+  --bg-soft: #fdfaf5;
+  --ink: #3a3a3a;
+  --muted: #8a8074;
+  --accent: #a8b89a; /* sage */
+  --rose: #c97b7b;
+  --line: #cdbfa8;
+  --node-black: #3a3a3a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: linear-gradient(180deg, #f7f3ec 0%, #efe9dd 100%);
+  color: var(--ink);
+  font-family: 'Quicksand', system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+body {
+  line-height: 1.5;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font-family: inherit;
+}

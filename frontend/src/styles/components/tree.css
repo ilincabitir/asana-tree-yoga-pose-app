@@ -1,0 +1,22 @@
+.tree-area {
+  position: relative;
+  min-height: 80vh;
+  overflow: auto;
+  padding: 120px 20px 300px;
+}
+
+.tree-canvas-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.tree-canvas-wrapper svg {
+  overflow: visible;
+}
+
+.empty-tree {
+  text-align: center;
+  color: var(--muted);
+  font-style: italic;
+  padding: 80px 20px;
+}
