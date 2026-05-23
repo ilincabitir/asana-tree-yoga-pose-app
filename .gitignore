@@ -1,8 +1,6 @@
-# Ignore dependency folders for both apps
 backend/node_modules/
 frontend/node_modules/
-
-# Ignore local builds and environment environments
+node_modules/
 frontend/build/
 frontend/dist/
 .env
