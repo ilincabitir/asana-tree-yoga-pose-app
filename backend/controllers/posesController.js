@@ -1,6 +1,6 @@
 const express = require('express');
 
-module.exports = function registerPoseRoutes(app, { tree, posesModule, workoutsModule, allocatePoseId }) {
+module.exports = function registerPoseRoutes(app, { tree, posesModule, dsuStore, allocatePoseId }) {
   const router = express.Router();
 
   router.get('/tree', (req, res) => {
@@ -22,12 +22,9 @@ module.exports = function registerPoseRoutes(app, { tree, posesModule, workoutsM
     });
     tree.RBInsert(node);
     posesModule.savePoses();
-    workoutsModule.reconcileWorkoutsWithTree();
     const key = Number(difficulty);
-    const exists = workoutsModule.getWorkouts().some((workout) => workout.items.includes(key));
-    if (!exists) {
-      workoutsModule.createWorkout(title, [key]);
-    }
+    dsuStore.ensureNode(key);
+    dsuStore.save();
     res.json({ tree: tree.serialize(), id });
   });
 
@@ -39,7 +36,6 @@ module.exports = function registerPoseRoutes(app, { tree, posesModule, workoutsM
     }
     tree.RBDelete(node);
     posesModule.savePoses();
-    workoutsModule.reconcileWorkoutsWithTree();
     res.json({ tree: tree.serialize() });
   });
 

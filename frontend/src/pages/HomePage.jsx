@@ -4,7 +4,6 @@ import TreeView from '../components/TreeView';
 import PoseModal from '../components/PoseModal';
 import AddPoseModal from '../components/AddPoseModal';
 import { useTreeData } from '../hooks/useTreeData';
-import { fetchWorkouts } from '../api';
 import { findNodeById } from '../utils/rbtree';
 import '../styles/components/modal.css';
 import '../styles/pages/home.css';
@@ -26,11 +25,6 @@ export default function HomePage() {
   const handleRemove = async () => {
     if (removeKey === '') return;
     const newTree = await deletePose(Number(removeKey));
-    try {
-      await fetchWorkouts();
-    } catch {
-      // ignore; workouts will refresh on next load
-    }
     setShowRemove(false);
     setRemoveKey('');
     if (focusNode && focusNode.key === Number(removeKey)) setFocusNode(null);

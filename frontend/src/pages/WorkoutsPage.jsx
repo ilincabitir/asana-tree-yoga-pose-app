@@ -1,36 +1,95 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import DSUTreeView from '../components/DSUTreeView';
-import { fetchFindSetByPose } from '../api';
+import { fetchDsuState, fetchFindSetByPose, unionDsu } from '../api';
 import usePoseMap from '../hooks/usePoseMap';
-import useDsuMap from '../hooks/useDsuMap';
 import '../styles/pages/workouts.css';
 
-export default function WorkoutsPage({ workouts, onMergeWorkouts, onDeleteWorkout }) {
-  const [leftId, setLeftId] = useState('');
-  const [rightId, setRightId] = useState('');
-  const [mergeName, setMergeName] = useState('');
+function findSet(parent, x) {
+  if (parent[x] == null) parent[x] = x;
+  if (parent[x] !== x) parent[x] = findSet(parent, parent[x]);
+  return parent[x];
+}
+
+export default function WorkoutsPage() {
+  const [leftRoot, setLeftRoot] = useState('');
+  const [rightRoot, setRightRoot] = useState('');
   const [findPose, setFindPose] = useState('');
   const [findResult, setFindResult] = useState(null);
   const [findError, setFindError] = useState('');
+  const [dsuState, setDsuState] = useState({ parent: [], rankArr: [] });
+  const [dsuError, setDsuError] = useState('');
 
   const poseMap = usePoseMap();
-  const dsuMap = useDsuMap(workouts);
+
+  const poseKeys = useMemo(() => {
+    return Object.keys(poseMap)
+      .map((k) => Number(k))
+      .filter((k) => Number.isFinite(k))
+      .sort((a, b) => a - b);
+  }, [poseMap]);
+
+  const workouts = useMemo(() => {
+    const baseParent = Array.isArray(dsuState.parent) ? dsuState.parent : [];
+    const parentCopy = baseParent.slice();
+    poseKeys.forEach((k) => {
+      if (parentCopy[k] == null) parentCopy[k] = k;
+    });
+
+    const groups = new Map();
+    poseKeys.forEach((k) => {
+      const root = findSet(parentCopy, k);
+      if (!groups.has(root)) groups.set(root, []);
+      groups.get(root).push(k);
+    });
+
+    return Array.from(groups.entries())
+      .map(([root, items]) => ({ root, items: items.slice().sort((a, b) => a - b) }))
+      .sort((a, b) => a.root - b.root);
+  }, [poseKeys, dsuState.parent]);
 
   const workoutOptions = workouts.map((workout) => (
-    <option key={workout.id} value={workout.id}>
-      {workout.name}
+    <option key={workout.root} value={workout.root}>
+      Workout {workout.root}
     </option>
   ));
 
+  const reloadDsu = async () => {
+    const state = await fetchDsuState();
+    setDsuState({ parent: state.parent || [], rankArr: state.rankArr || [] });
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        setDsuError('');
+        const state = await fetchDsuState();
+        if (cancelled) return;
+        setDsuState({ parent: state.parent || [], rankArr: state.rankArr || [] });
+      } catch (err) {
+        if (cancelled) return;
+        setDsuError(err?.response?.data?.error || 'Failed to load DSU state.');
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleMerge = (e) => {
     e.preventDefault();
-    if (!leftId || !rightId || leftId === rightId) return;
-    const left = Number(leftId);
-    const right = Number(rightId);
-    onMergeWorkouts(left, right, mergeName || '');
-    setLeftId('');
-    setRightId('');
-    setMergeName('');
+    if (!leftRoot || !rightRoot || leftRoot === rightRoot) return;
+    const left = Number(leftRoot);
+    const right = Number(rightRoot);
+    if (!Number.isFinite(left) || !Number.isFinite(right)) return;
+    unionDsu(left, right)
+      .then(() => reloadDsu())
+      .catch(() => {
+        setDsuError('Failed to merge workouts.');
+      });
+    setLeftRoot('');
+    setRightRoot('');
   };
 
   const handleFindSet = async (e) => {
@@ -59,22 +118,17 @@ export default function WorkoutsPage({ workouts, onMergeWorkouts, onDeleteWorkou
       <section className="workouts-merge">
         <h2>Merge workouts</h2>
         <form className="merge-form" onSubmit={handleMerge}>
-          <select value={leftId} onChange={(e) => setLeftId(e.target.value)}>
+          <select value={leftRoot} onChange={(e) => setLeftRoot(e.target.value)}>
             <option value="">Select first workout</option>
             {workoutOptions}
           </select>
-          <select value={rightId} onChange={(e) => setRightId(e.target.value)}>
+          <select value={rightRoot} onChange={(e) => setRightRoot(e.target.value)}>
             <option value="">Select second workout</option>
             {workoutOptions}
           </select>
-          <input
-            type="text"
-            placeholder="Merged workout name"
-            value={mergeName}
-            onChange={(e) => setMergeName(e.target.value)}
-          />
           <button className="nav-btn" type="submit">Merge</button>
         </form>
+        {dsuError && <div className="find-error">{dsuError}</div>}
       </section>
 
       <section className="workouts-merge">
@@ -91,36 +145,33 @@ export default function WorkoutsPage({ workouts, onMergeWorkouts, onDeleteWorkou
         {findError && <div className="find-error">{findError}</div>}
         {findResult && (
           <div className="find-result">
-            Workout: {findResult.workoutName} | Representative: {findResult.representative} | Members: {findResult.members.join(', ')}
+            Representative: {findResult.representative} | Members: {findResult.members.join(', ')}
           </div>
         )}
       </section>
 
       <section className="workout-grid">
         {workouts.length === 0 && (
-          <div className="workouts-empty">No workouts yet. Create one to get started.</div>
+          <div className="workouts-empty">No workouts yet. Add poses and connect them to form components.</div>
         )}
         {workouts.map((workout) => {
           const items = workout.items;
-          const parent = dsuMap[workout.id] || items.map((_, i) => i);
+          const globalParent = Array.isArray(dsuState.parent) ? dsuState.parent : [];
+          const indexByPose = new Map(items.map((pose, idx) => [pose, idx]));
+          const parent = items.map((pose) => {
+            const parentPose = globalParent[pose] == null ? pose : globalParent[pose];
+            const parentIndex = indexByPose.get(parentPose);
+            return parentIndex == null ? indexByPose.get(pose) : parentIndex;
+          });
           return (
-            <article key={workout.id} className="workout-card">
+            <article key={workout.root} className="workout-card">
               <div className="workout-card__header">
                 <h3>
-                  {workout.name}
+                  Workout {workout.root}
                   <span className="workout-set">{`{ ${items.join(', ')} }`}</span>
                 </h3>
                 <div className="workout-card__actions">
                   <span className="workout-card__meta">{items.length} poses</span>
-                  {items.length >= 2 && (
-                    <button
-                      className="nav-btn ghost"
-                      type="button"
-                      onClick={() => onDeleteWorkout(workout.id)}
-                    >
-                      Delete
-                    </button>
-                  )}
                 </div>
               </div>
               <DSUTreeView items={items} parent={parent} poseMap={memoPoseMap} />
