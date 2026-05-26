@@ -1,10 +1,11 @@
 const MAXN = 10000;
 
+//create new set containing x
 function makeSet(parent, rankArr, x) {
   parent[x] = x;
-  rankArr[x] = 0;
+  rankArr[x] = 0;  //approximate height of the tree rooted at x, used for optimizarion of union
 }
-
+//find representative of set containing x 
 function findSet(parent, x) {
   if (x !== parent[x]) {
     parent[x] = findSet(parent, parent[x]);
@@ -13,16 +14,17 @@ function findSet(parent, x) {
 }
 
 function link(parent, rankArr, x, y) {
-  if (rankArr[x] > rankArr[y]) {
+  if (rankArr[x] > rankArr[y]) { //compare ranks to decide which representative becomes the parent of the other
     parent[y] = x;
   } else {
     parent[x] = y;
     if (rankArr[x] === rankArr[y]) {
-      rankArr[y]++;
+      rankArr[y]++; //pick one as root, y here, and increase its rank
     }
   }
 }
 
+//merge sets containing x and y
 function union(parent, rankArr, x, y) {
   link(parent, rankArr, findSet(parent, x), findSet(parent, y));
 }

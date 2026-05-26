@@ -1,26 +1,5 @@
 [
   {
-    "id": 47,
-    "name": "Eagle Pose - Crouching Variation",
-    "items": [
-      11
-    ]
-  },
-  {
-    "id": 50,
-    "name": "Child's Pose",
-    "items": [
-      1
-    ]
-  },
-  {
-    "id": 56,
-    "name": "Reverse Prayer ",
-    "items": [
-      5
-    ]
-  },
-  {
     "id": 57,
     "name": "Low Lunge",
     "items": [
@@ -28,17 +7,26 @@
     ]
   },
   {
-    "id": 59,
+    "id": 67,
     "name": "Tiger Pose",
     "items": [
       7
     ]
   },
   {
-    "id": 60,
-    "name": "Easy Revolved Pose",
+    "id": 69,
+    "name": "workout",
     "items": [
-      2
+      2,
+      11,
+      1
+    ]
+  },
+  {
+    "id": 70,
+    "name": "Dancer's Pose",
+    "items": [
+      13
     ]
   }
 ]
