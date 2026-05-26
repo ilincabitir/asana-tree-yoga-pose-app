@@ -73,4 +73,5 @@
   background: transparent;
   color: var(--ink);
   border: 1px solid var(--line);
+  margin-top: 8px;
 }

@@ -45,10 +45,25 @@ module.exports = function makeDsuStore(DSU_FILE) {
     ids.forEach((id) => ensureNode(id));
   }
 
+  function resetDSU(nodes) {
+    if (!Array.isArray(nodes)) return getState();
+    parent = [];
+    rankArr = [];
+    nodes.forEach((node) => {
+      const id = Number(node && typeof node === 'object' ? node.key : node);
+      if (!isFiniteNumber(id)) return;
+      parent[id] = id;
+      rankArr[id] = 0;
+    });
+    save();
+    return getState();
+  }
+
   function unionNodes(a, b) {
     ensureNode(a);
     ensureNode(b);
     union(parent, rankArr, Number(a), Number(b));
+    save();
     return findSet(parent, Number(a));
   }
 
@@ -69,6 +84,7 @@ module.exports = function makeDsuStore(DSU_FILE) {
     save,
     ensureNode,
     ensureNodes,
+    resetDSU,
     unionNodes,
     findRepresentative,
     getState,

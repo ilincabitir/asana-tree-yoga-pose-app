@@ -2,6 +2,7 @@
   width: 100%;
   overflow: auto;
   padding: 24px 16px 40px;
+ 
 }
 
 .dsu-canvas svg {
@@ -14,10 +15,12 @@
   stroke: var(--line);
   stroke-width: 2.5;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+ 
 }
 
 .dsu-node__fill {
   fill: #efe7d8;
+  
 }
 
 .dsu-label {

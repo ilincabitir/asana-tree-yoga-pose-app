@@ -43,6 +43,12 @@ module.exports = function registerWorkoutRoutes(app, { tree, dsuStore }) {
     res.json({ representative, parent, rankArr });
   });
 
+  router.post('/dsu/reset', (req, res) => {
+    const nodes = tree.toList();
+    const state = dsuStore.resetDSU(nodes);
+    res.json(state);
+  });
+
   router.get('/dsu/find-set', (req, res) => {
     const pose = Number(req.query.pose);
     if (!isFiniteNumber(pose)) return res.status(400).json({ error: 'pose must be a number' });

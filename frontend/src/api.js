@@ -8,5 +8,6 @@ export const deletePose = (difficulty) =>
 
 export const fetchDsuState = () => axios.get(`${BASE}/dsu`).then((r) => r.data);
 export const unionDsu = (a, b) => axios.post(`${BASE}/dsu/union`, { a, b }).then((r) => r.data);
+export const resetDsu = () => axios.post(`${BASE}/dsu/reset`).then((r) => r.data);
 export const fetchFindSetByPose = (pose) =>
   axios.get(`${BASE}/dsu/find-set`, { params: { pose } }).then((r) => r.data);

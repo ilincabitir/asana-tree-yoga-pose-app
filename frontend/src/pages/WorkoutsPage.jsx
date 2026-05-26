@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import DSUTreeView from '../components/DSUTreeView';
-import { fetchDsuState, fetchFindSetByPose, unionDsu } from '../api';
+import { fetchDsuState, fetchFindSetByPose, resetDsu, unionDsu } from '../api';
 import usePoseMap from '../hooks/usePoseMap';
 import '../styles/pages/workouts.css';
 
@@ -92,6 +92,18 @@ export default function WorkoutsPage() {
     setRightRoot('');
   };
 
+  const handleResetGroups = async () => {
+    try {
+      const state = await resetDsu();
+      setDsuState({ parent: state.parent || [], rankArr: state.rankArr || [] });
+      setFindError('');
+      setFindResult(null);
+      setDsuError('');
+    } catch (err) {
+      setDsuError(err?.response?.data?.error || 'Failed to reset groups.');
+    }
+  };
+
   const handleFindSet = async (e) => {
     e.preventDefault();
     setFindError('');
@@ -128,6 +140,11 @@ export default function WorkoutsPage() {
           </select>
           <button className="nav-btn" type="submit">Merge</button>
         </form>
+        <div className="merge-actions">
+          <button className="nav-btn ghost" type="button" onClick={handleResetGroups}>
+            Reset Groups
+          </button>
+        </div>
         {dsuError && <div className="find-error">{dsuError}</div>}
       </section>
 
